@@ -1,0 +1,26 @@
+<launch>
+  <arg name="primitive_list" default="[my_primitive]"/>
+  <arg name="skill_list" default="[my_skill]"/>
+  <arg name="debug" default="false"/>
+  <arg name="deploy" default="true"/>
+  <arg name="robot_ontology_prefix" default="moveit"/>
+  <arg name="robot_name" default="test_robot"/>
+
+  <!-- UR simulation -->
+  <include file="$(find ur_gazebo)/launch/ur5.launch">
+    <arg name="gui" value="false" doc="Starts gazebo gui" />
+  </include>
+
+  <!-- Moveit -->
+  <include file="$(find ur5_moveit_config)/launch/ur5_moveit_planning_execution.launch">
+    <arg name="sim" value="true"/>
+  </include>
+
+  <!-- Linear motion -->
+  <include file="$(find moveit_linear_motion)/launch/run.launch">
+    <arg name="move_group" value="manipulator"/>
+  </include>
+
+  <!-- Rviz -->
+  <node pkg="rviz" type="rviz" name="rviz" respawn="false" args="-d $(find skiros2_moveit_lib)/launch/config.rviz"/>
+</launch>

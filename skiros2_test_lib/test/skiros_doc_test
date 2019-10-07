@@ -1,0 +1,68 @@
+#!/usr/bin/env python
+
+from skiros2_common.core import property, params, world_element
+from skiros2_common.ros import utils
+from skiros2_std_reasoners import aau_spatial_reasoner
+from skiros2_common.core import conditions
+import doctest
+
+verbose = False
+
+from skiros2_skill.ros.skill_manager import SkillManager
+from skiros2_skill.core.skill import SkillBase
+from skiros2_common.core.primitive import PrimitiveBase
+import skiros2_test_lib.test as ts
+import rospy
+
+def testVisitors():
+    rospy.init_node("skill_mgr", anonymous=False)
+    sm = SkillManager("test_robot")
+    sm.loadSkills(ts)
+    skill_list = []
+    for p in sm._plug_loader:
+        if p.__bases__[0] == SkillBase:
+            skill_list.append(sm.addSkill(p.__name__))
+        if p.__bases__[0] == PrimitiveBase:
+            sm.addSkill(p.__name__)
+    track_params = []
+    #track_params.append(("Pose", "skiros:PositionX"))
+    #track_params.append(("Pose2", "skiros:PositionX"))
+    for s in skill_list:
+        uid = sm.addTask([s])
+        sm.executeTask(uid, track_params=track_params)
+        sm._tasks.join(uid)
+
+if __name__ == '__main__':
+    print("========= TEST WITH DOCTEST ===========")
+    if True:
+        print("========= Testing properties =========")
+        r = doctest.testmod(property, verbose=verbose)
+        if r.failed == 0:
+            print "OK"
+    if True:
+        print("========= Testing params =========")
+        r = doctest.testmod(params, verbose=verbose)
+        if r.failed == 0:
+            print "OK"
+    if True:
+        print("========= Testing json serialization =========")
+        r = doctest.testmod(utils, verbose=verbose)
+        if r.failed == 0:
+            print "OK"
+    if True:
+        print("========= Testing AauSpatialReasoner =========")
+        r = doctest.testmod(aau_spatial_reasoner, verbose=verbose)
+        if r.failed == 0:
+            print "OK"
+    if True:
+        print("========= Testing World Element =========")
+        r = doctest.testmod(world_element, verbose=verbose)
+        if r.failed == 0:
+            print "OK"
+    if True:
+        print("========= Testing Conditions =========")
+        r = doctest.testmod(conditions, verbose=verbose)
+        if r.failed == 0:
+            print "OK"
+    if False:
+        testVisitors()

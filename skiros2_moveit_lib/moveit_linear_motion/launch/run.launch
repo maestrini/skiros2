@@ -1,0 +1,11 @@
+<launch>
+  <arg name="debug" default="false"/>
+
+  <arg unless="$(arg debug)" name="prefix" value="" />
+  <arg if="$(arg debug)" name="prefix" value="xterm -e gdb -ex run --args" />
+  <arg name="move_group" default="arm"/>
+
+  <node launch-prefix="$(arg prefix)" name="linear_motion_$(arg move_group)" pkg="moveit_linear_motion" type="linear_motion_server" output="screen">
+      <param name="move_group" value="$(arg move_group)"/>
+  </node>
+</launch>
