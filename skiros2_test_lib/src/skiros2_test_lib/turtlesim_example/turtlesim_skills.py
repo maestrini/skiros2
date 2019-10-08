@@ -1,6 +1,123 @@
-from skiros2_skill.core.skill import SkillDescription, SkillBase, Serial, ParallelFf, Selector, Sequential
+from skiros2_skill.core.skill import SkillDescription, SkillBase, Serial, ParallelFf, ParallelFs, Selector, Sequential
 from skiros2_common.core.params import ParamTypes
 from skiros2_common.core.world_element import Element
+
+
+
+#################################################################################
+# Move
+#################################################################################
+
+
+class Move(SkillDescription):
+    def createDescription(self):
+        self.addParam("Turtle", Element("cora:Robot"), ParamTypes.Required)
+        self.addParam("Linear", float, ParamTypes.Required)
+        self.addParam("Angular", float, ParamTypes.Required)
+        self.addParam("Duration", float, ParamTypes.Required)
+
+class move(SkillBase):
+    def createDescription(self):
+        self.setDescription(Move(), self.__class__.__name__)
+
+    def expand(self, skill):
+        skill.setProcessor(ParallelFs())
+        skill(
+            self.skill("Command", "command"),
+            self.skill("Wait", "wait")
+        )
+
+
+class Go(SkillDescription):
+    def createDescription(self):
+        self.addParam("Turtle", Element("cora:Robot"), ParamTypes.Required)
+        self.addParam("Duration", 1.0, ParamTypes.Required)
+        self.addParam("Distance", 1.0, ParamTypes.Required)
+
+class go(SkillBase):
+    def createDescription(self):
+        self.setDescription(Go(), self.__class__.__name__)
+
+    def expand(self, skill):
+        velocity = self.params["Distance"].value / self.params["Duration"].value
+        skill.setProcessor(ParallelFs())
+        skill(
+            self.skill("Command", "command", specify={"Linear": velocity, "Angular": 0.0}),
+            self.skill("Wait", "wait", specify={"Duration": self.params["Duration"].value})
+        )
+
+
+class Turn(SkillDescription):
+    def createDescription(self):
+        self.addParam("Turtle", Element("cora:Robot"), ParamTypes.Required)
+        self.addParam("Duration", 1.0, ParamTypes.Required)
+        self.addParam("Angle", 10.0, ParamTypes.Required)
+
+class turn(SkillBase):
+    def createDescription(self):
+        self.setDescription(Turn(), self.__class__.__name__)
+
+    def expand(self, skill):
+        velocity = self.params["Angle"].value / self.params["Duration"].value
+        skill.setProcessor(ParallelFs())
+        skill(
+            self.skill("Command", "command", specify={"Angular": velocity, "Linear": 0.0}),
+            self.skill("Wait", "wait", specify={"Duration": self.params["Duration"].value})
+        )
+
+
+
+
+
+class AttractTo(SkillDescription):
+    def createDescription(self):
+        self.addParam("Turtle", Element("cora:Robot"), ParamTypes.Required)
+        self.addParam("Target", Element("sumo:Object"), ParamTypes.Required)
+
+class attract_to(SkillBase):
+    def createDescription(self):
+        self.setDescription(AttractTo(), self.__class__.__name__)
+
+    def expand(self, skill):
+        skill.setProcessor(ParallelFs())
+        skill(
+            self.skill("Monitor", "monitor", specify={"Turtle": self.params["Turtle"].value}),
+            self.skill("Monitor", "monitor", specify={"Turtle": self.params["Target"].value}),
+            self.skill("PoseController", "pose_controller"),
+            self.skill("Command", "command"),
+            self.skill("Wait", "wait", specify={"Duration": 10000.0})
+        )
+
+
+
+
+#class TurnTowards(SkillDescription):
+#    def createDescription(self):
+#        self.addParam("Name", str, ParamTypes.Required)
+#        self.addParam("Target", str, ParamTypes.Required)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #################################################################################
 # Description
