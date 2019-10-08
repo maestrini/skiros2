@@ -1,8 +1,8 @@
 <launch>
-  <arg name="primitive_list" default="[command, spawn, monitor, wait, pose_controller, turtle_find, target_follow, wander_around, wander_around_2, turtle_spawn]"/>
-  <arg name="skill_list" default="[move, go, turn, attract_to, patrol_and_follow, stay_still_and_follow, turtle_spawn_and_follow, turtle_spawn_and_wander]"/>
+  <arg name="primitive_list" default="[spawn]"/>
+  <arg name="skill_list" default="[move, attract_to, round_trip, demo]"/>
   <arg name="debug" default="false"/>
-  <arg name="deploy" default="false"/>
+  <arg name="deploy" default="true"/>
 
   <node name="turtlesim" pkg="turtlesim" type="turtlesim_node" />
 
@@ -19,7 +19,7 @@
   <include file="$(find skiros2)/launch/skill_mgr.launch">
       <arg name="verbose" value="false"/>
       <arg name="debug" value="$(arg debug)"/>
-      <arg name="libraries_list" value="[skiros2_test_lib]"/>
+      <arg name="libraries_list" value="[skiros2_test_lib, skiros2_std_skills]"/>
       <arg name="primitive_list" value="$(arg primitive_list)"/>
       <arg name="skill_list" value="$(arg skill_list)" />
       <arg name="robot_ontology_prefix" value="tts"/>
