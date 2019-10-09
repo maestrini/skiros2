@@ -5,7 +5,7 @@ tfd='tfd-src-0.4'
 echo "Installing planner..."
 
 #Navigate to install folder
-folder="./utils"
+folder="$HOME/utils"
 # echo "Select install folder or leave blank for default [default: $default]:"
 # read folder
 # if [[ $folder == "" ]]; then
