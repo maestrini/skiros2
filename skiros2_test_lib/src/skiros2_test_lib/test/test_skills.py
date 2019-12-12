@@ -1,4 +1,4 @@
-from skiros2_skill.core.skill import SkillDescription, SkillBase, Selector, State, ParallelFf, Sequential
+from skiros2_skill.core.skill import SkillDescription, SkillBase, Selector, State, ParallelFf, SerialStar
 from skiros2_common.core.primitive import PrimitiveBase
 from skiros2_common.core.params import ParamTypes
 
@@ -21,7 +21,6 @@ class TestSkill(SkillDescription):
 #################################################################################
 # Implementation
 #################################################################################
-
 
 class test_primitive(PrimitiveBase):
     def createDescription(self):
@@ -47,38 +46,38 @@ class test_primitive(PrimitiveBase):
 
 
 class test_skill_sequence(SkillBase):
-    """
-    Tree is:
-    ----->: ()
-    ------->:
-    ------->:
-
-    """
     def createDescription(self):
         self.setDescription(TestSkill(), self.__class__.__name__)
 
     def expand(self, skill):
-        skill.setProcessor(Sequential())
+        skill.setProcessor(SerialStar())
         skill(
-            self.skill(":TestPrimitive", ""),
-            self.skill(":TestPrimitive", "", specify={"Force": 1.0})
+            self.skill("TestPrimitive", ""),
+            self.skill("TestPrimitive", "", specify={"Force": 1.0})
         )
 
 class test_skill_parallel(SkillBase):
-    """
-    Tree is:
-    ----->: ()
-    ------->:
-    ------->:
-
-    """
     def createDescription(self):
         self.setDescription(TestSkill(), self.__class__.__name__)
 
     def expand(self, skill):
+        self.setProcessor(ParallelFf())
         skill.setProcessor(ParallelFf())
         skill(
-            self.skill(":TestPrimitive", "test_primitive"),
-            self.skill(":TestPrimitive", "test_primitive", specify={"Force": 1.0}),
-            self.skill(":TestPrimitive", "", specify={"Force": 2.0})
+            self.skill("TestPrimitive", "test_primitive"),
+            self.skill("TestPrimitive", "test_primitive", specify={"Force": 1.0}),
+            self.skill("TestPrimitive", "", specify={"Force": 2.0})
+        )
+
+class test_skill_sequence_of_parallels(SkillBase):
+    def createDescription(self):
+        self.setDescription(TestSkill(), self.__class__.__name__)
+
+    def expand(self, skill):
+        self.setProcessor(SerialStar())
+        skill.setProcessor(SerialStar())
+        skill(
+            self.skill("TestSkill", "test_skill_parallel"),
+            self.skill("TestSkill", "test_skill_parallel"),
+            self.skill("TestSkill", "test_skill_parallel"),
         )

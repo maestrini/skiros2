@@ -11,11 +11,15 @@ from skiros2_common.tools.time_keeper import TimeKeepers
 
 
 class IndividualsDataset(Ontology):
-    """
-    An ontology with methods to handle individuals using the Element class
-    """
-
     def __init__(self, verbose, context_id, graph=None, init=False):
+        """
+        @brief      Manages a set of individuals using the Element class
+
+        @param      verbose     The verbose
+        @param      context_id  The context identifier
+        @param      graph       The graph
+        @param      init        The initialize
+        """
         Ontology.__init__(self, graph)
         self._reasoners = {}
         self._verbose = verbose
@@ -91,7 +95,7 @@ class IndividualsDataset(Ontology):
             else:
                 log.error("[get_individual]", "Ignoring {}-{}-{}. Predicate is not defined in the ontology.".format(name, self.uri2lightstring(predicate), self.uri2lightstring(obj)))
         for subj, predicate in self.ontology(context_id).subject_predicates(subject):
-            if (self.uri2lightstring(predicate)!="skiros:hasTemplate"):
+            if (self.uri2lightstring(predicate) != "skiros:hasTemplate"):
                 e.addRelation(self.uri2lightstring(subj), self.uri2lightstring(predicate), "-1")
         self._add_reasoners_prop(e)
         return e
@@ -212,7 +216,6 @@ class IndividualsDataset(Ontology):
     @synchronized
     def update_properties(self, e, author, reasoner=None):
         """
-        modified
         @brief Update properties of an element in the scene
         """
         for name, r in self._reasoners.iteritems():
@@ -224,6 +227,15 @@ class IndividualsDataset(Ontology):
             prop_to_update = reasoner.getAssociatedData()
         else:
             prop_to_update = e.available_properties()
+            prop_to_remove = set(old_e.available_properties()).difference(set(prop_to_update))
+            for k in prop_to_remove:
+                predicate = self.lightstring2uri(k)
+                values = old_e.getProperty(k).values
+                for v in values:
+                    self._remove((subject, predicate, rdflib.term.Literal(v, datatype=self._get_datatype(old_e.getProperty(k)))), author)
+            for k in prop_to_remove:
+                if old_e.hasProperty(k):
+                    old_e.removeProperty(k)
             # Horrible hack to update also the label. Label should be moved with other properties to make this clean
             old_e.label = e.label
             self._set((subject, RDFS.label, rdflib.term.Literal(e.label)), author)
@@ -237,11 +249,14 @@ class IndividualsDataset(Ontology):
                 for i in range(0, len(values)):
                     self._add((subject, predicate, rdflib.term.Literal(values[i], datatype=self._get_datatype(p))), author)
             elif old_e.getProperty(k).values != values:
-                old_e.setProperty(k, values)
                 if values:
                     self._set((subject, predicate, rdflib.term.Literal(values[0], datatype=self._get_datatype(p))), author)
+                else:
+                    for v in old_e.getProperty(k).values:
+                        self._remove((subject, predicate, rdflib.term.Literal(v, datatype=self._get_datatype(old_e.getProperty(k)))), author)
                 for i in range(1, len(values)):
                     self._add((subject, predicate, rdflib.term.Literal(values[i], datatype=self._get_datatype(p))), author)
+                old_e.setProperty(k, values)
         self._elements_cache[e.id] = old_e
 
     @synchronized
@@ -477,11 +492,15 @@ class IndividualsDataset(Ontology):
 
 
 class WorldModel(IndividualsDataset):
-    """
-    @brief A set of individuals with unique ID generation
-    """
-
     def __init__(self, verbose, context_id, change_cb):
+        """
+        @brief      Manages a set of individuals with unique ID
+                    generation
+
+        @param      verbose     The verbose
+        @param      context_id  The context identifier
+        @param      change_cb   The change cb
+        """
         self._id_gen = IdGen()
         self._change_cb = change_cb
         IndividualsDataset.__init__(self, verbose, context_id, init=False)
@@ -505,7 +524,8 @@ class WorldModel(IndividualsDataset):
         """
         IndividualsDataset._remove(self, statement, author, is_relation)
         if is_relation:
-            self._change_cb(author, "remove", relation={'src': self.uri2lightstring(statement[0]), 'type': self.uri2lightstring(statement[1]), 'dst': self.uri2lightstring(statement[2])})
+            self._change_cb(author, "remove", relation={'src': self.uri2lightstring(
+                statement[0]), 'type': self.uri2lightstring(statement[1]), 'dst': self.uri2lightstring(statement[2])})
 
     def _add(self, statement, author, is_relation=False):
         """
@@ -513,7 +533,8 @@ class WorldModel(IndividualsDataset):
         """
         IndividualsDataset._add(self, statement, author, is_relation)
         if is_relation:
-            self._change_cb(author, "add", relation={'src': self.uri2lightstring(statement[0]), 'type': self.uri2lightstring(statement[1]), 'dst': self.uri2lightstring(statement[2])})
+            self._change_cb(author, "add", relation={'src': self.uri2lightstring(
+                statement[0]), 'type': self.uri2lightstring(statement[1]), 'dst': self.uri2lightstring(statement[2])})
 
     def _uri2type(self, uri):
         return uri.split('-')[0]

@@ -24,12 +24,15 @@ Run "trajectory_coordinator" skill from skiros GUI
 
 ### Task planner example
 
+Note: you should have installed the Fast Downward planner using the script in `skiros2/skiros2/scripts` before running this example.
+
 ```roslaunch skiros2_test_lib planning_example.launch```
 
-Run "task_plan" skill from skiros GUI with Goal in PDDL format. For example:
+Run "task_plan" skill from skiros GUI with a Goal in PDDL format. For example:
 
-place starter 145 in box 80: (skiros:contain skiros:LargeBox-80 skiros:Starter-145)
-place all starters in box 80: (forall (?x - skiros:Product) (skiros:contain skiros:LargeBox-51 ?x) )
+Place starter 145 in box 80: `(skiros:contain skiros:LargeBox-80 skiros:Starter-145)`  
+
+Place all starters in box 80: `(forall (?x - skiros:Product) (skiros:contain skiros:LargeBox-51 ?x) )`  
 
 ### Turtlesim example
 

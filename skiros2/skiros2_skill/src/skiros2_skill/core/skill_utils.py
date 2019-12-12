@@ -4,8 +4,6 @@ import skiros2_common.core.params as params
 from skiros2_skill.core.processors import Serial, ParallelFf, State
 import skiros2_common.tools.logger as log
 import numpy as np
-from skiros2_common.tools.time_keeper import *
-
 from copy import deepcopy
 
 
@@ -198,7 +196,7 @@ class NodeExecutor():
         """
         @brief ground undefined parameters with elements in the world model
         """
-        matches = self._wm.resolve_elements2(to_resolve, cp)
+        matches = self._wm._resolve_elements2(to_resolve, cp)
         _grounded = ''
         for key, match in matches.iteritems():
             if match.any():
